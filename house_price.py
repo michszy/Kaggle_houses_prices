@@ -130,18 +130,18 @@ def boxplot_categorical_features(data, col, figsize):
     f, ax = plt.subplots(figsize=figsize)
     fig = sns.boxplot(x = col, y="SalePrice", data = categorical)
     fig.axis(ymin=0, ymax=800000)
-    
+
 def boxplot_categorical_features2(data,col,figsize):
     data = pd.concat([data['SalePrice'],data[col]], axis = 1)
     fig, ax = plt.subplots(figsize=figsize)
     fig = sns.boxplot(x=col, y = 'SalePrice', data=data)
     fig.axis(ymin=0, ymax=800000)
     plt.xticks(rotation=90)
-    
+
 def heatmap(variable):
     f,ax = plt.subplots(figsize=(12,9))
     sns.heatmap(variable, vmax=.8, square=True)
-    
+
 def heatmap_zoomed(k, data, corr):
     cols = corr.nlargest(k, 'SalePrice')['SalePrice'].index
     cm = np.corrcoef(data[cols].values.T)
@@ -149,12 +149,12 @@ def heatmap_zoomed(k, data, corr):
     hm = sns.heatmap(cm, cbar=True, annot=True, square=True, fmt='.2f', annot_kws={'size':k}, \
                      yticklabels=cols.values, xticklabels=cols.values)
     plt.show()
-    
+
 def scatter_corr_variables(data, cols):
     sns.set()
     sns.pairplot(data[cols], size=2.5)
     plt.show()
-    
+
 def make_dummies(data, categorical_vars):
     for var in categorical_vars:
         data = pd.concat([data, pd.get_dummies(data[var], prefix=var)], 1)
@@ -209,10 +209,9 @@ def get_dummies(data, cols):
         data.drop(i, axis=1)
         pd.concat([data, one_hot_i])
     return data
-        
-        
+
+
 #scaler
 
 # make dummies
-
 final_data = get_dummies(train, string_cols)
