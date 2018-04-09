@@ -113,6 +113,19 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+from matplotlib import cm
+from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import MinMaxScaler
+from sklearn import manifold, datasets
+from sklearn.datasets.samples_generator import make_blobs
+from mpl_toolkits.mplot3d import Axes3D
+from sklearn.ensemble import IsolationForest
+from sklearn import svm
+from sklearn.covariance import EllipticEnvelope
+from sklearn.neighbors import LocalOutlierFactor
+from scipy import stats
+import matplotlib.font_manager
 
 
 train = pd.read_csv("train.csv")
@@ -161,7 +174,7 @@ def make_dummies(data, categorical_vars):
         data = data.drop(var,1)
     return data
 
-def clean_data(data):
+def fillna_and_converting_int_to_float(data):
     for i in data.columns:
         if data[i].dtype == 'int64':
             data[i] = data[i].astype('float')
@@ -179,8 +192,35 @@ def cols_type(data, type):
             r.append(i)
     return r
 
+def logistic_reg(c, x, y):
+    LR = LogisticRegression(C=c)
+    LR.fit(x, y)
+    train_score = LR.score(x,y)
+    return train_score
+
+def get_dummies(data, cols):
+    for i in cols:
+        data= pd.get_dummies(data, i)
+        data.drop(i, axis=1)
+    return data
+
+def tsne_function(data, n_components):
+    tsne = manifold.TSNE(n_components= n_components, perplexity=30, init='random',random_state=0)
+    Y = tsne.fit_transform(data)
+    plt.figure()
+    plt.scatter(Y[:,0], Y[:,1])
+    plt.show()
+    r = tsne.predict()
+
+
+def functions_make_blobs(n_samples, centers, features):
+    X, y = make_blobs(n_samples=n_samples, centers=centers, n_features=features, random_state=0)
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    ax.scatter(X[:,0],X[:,1],X[:,2], c=y)
+    plt.show()
+
 #############Understanding data###############
-correlation = train.corr()
 
 #numeric_columns = ['GrLivArea','GarageArea','MSSubClass','LotFrontage','LotArea','OverallQual','OverallCond','YearBuilt','YearRemodAdd','MasVnrArea','BsmtFinSF1','BsmtFinSF2','BsmtUnfSF','TotalBsmtSF','GrLivArea','FullBath','TotRmsAbvGrd','GarageArea']
 #correlation = correlation["SalePrice"].abs().sort_values(ascending= False)
@@ -193,25 +233,60 @@ correlation = train.corr()
 #missing_data(train)
 
 
-train = clean_data(train)
-
-
-
-
-
+train = fillna_and_converting_int_to_float(train)
+# varible with all object and float type columns
 string_cols = cols_type(train, object)
-
-
-
-def get_dummies(data, cols):
-    for i in cols:
-        one_hot_i = pd.get_dummies(data[i])
-        data.drop(i, axis=1)
-        pd.concat([data, one_hot_i])
-    return data
-
+float_cols = cols_type(train, float)
 
 #scaler
 
+
+
 # make dummies
-final_data = get_dummies(train, string_cols)
+f_data = get_dummies(train, string_cols)
+
+
+to_drop_columns = ['Id', 'SalePrice']
+X = f_data.drop(to_drop_columns, axis=1)
+y = f_data['SalePrice']
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+
+
+outliers = LocalOutlierFactor()
+outliers = outliers.fit_predict(X)
+
+clf = IsolationForest()
+clf.fit(X_train)
+y_train_pred = clf.predict(y_train)
+print(y_train_pred)
+
+#y_pred_train = clf.predict(X_train)
+#y_pred_test = clf.predict(X_test)
+
+#xx, yy = np.meshgrid(np.linspace(-5,5,50), np.linspace(-5,5,50))
+#Z = clf.decision_function(np.c_[xx.ravel(), yy.ravel()])
+#Z = Z.reshape(xx.shape)
+
+
+
+#########Results##############
+#r_logistic_regression = logistic_reg(1,X_train, y_train))
+
+
+
+#def isolation_forest_func(train, test):
+#    clf = IsolationForest()
+#    clf.fit(train)
+#    pred = clf.predict(test)
+#    return pred
+
+
+#faire tourner un tsne
+#faire tourner un isolation forest
+#regarder les données anormales
+#comporer les données anormales de isolation forest avec tles erreurs de predictions
+#stratified kfold
+#            ensemnling
+
+#bagging or bootsting : random forest
