@@ -113,9 +113,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, GridSearchCV
 from matplotlib import cm
-from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import make_scorer, accuracy_score
+from sklearn.linear_model import LogisticRegression, LinearRegression
 from sklearn.preprocessing import MinMaxScaler
 from sklearn import manifold, datasets
 from sklearn.datasets.samples_generator import make_blobs
@@ -126,6 +127,7 @@ from sklearn.covariance import EllipticEnvelope
 from sklearn.neighbors import LocalOutlierFactor
 from scipy import stats
 import matplotlib.font_manager
+from sklearn.ensemble import RandomForestClassifier
 
 
 train = pd.read_csv("train.csv")
@@ -220,6 +222,24 @@ def functions_make_blobs(n_samples, centers, features):
     ax.scatter(X[:,0],X[:,1],X[:,2], c=y)
     plt.show()
 
+def scaler_func(X_train, X_test):
+    scaler = MinMaxScaler()
+    scaler.fit(X_train)
+    X_train = scaler.transform(X_train)
+    X_test = scaler.transform(X_test)
+    return X_train, X_test
+
+def RandomForestClassifierFunction(X_train,X_test,y_train, y_test,parameters):
+    acc_scorer = make_scorer(accuracy_score)
+    clf = RandomForestClassifier()
+    grid_obj = GridSearchCV(clf, parameters,scoring=acc_scorer)
+    grid_obj = grid_obj.fit(X_train, y_train)
+    clf = grid_obj.best_estimator_
+    clf.fit(X_train,y_train)
+    prediction = clf.predict(X_test)
+    print (accuracy_score(y_test,prediction))
+    return accuracy_score(y_test,prediction)
+
 #############Understanding data###############
 
 #numeric_columns = ['GrLivArea','GarageArea','MSSubClass','LotFrontage','LotArea','OverallQual','OverallCond','YearBuilt','YearRemodAdd','MasVnrArea','BsmtFinSF1','BsmtFinSF2','BsmtUnfSF','TotalBsmtSF','GrLivArea','FullBath','TotRmsAbvGrd','GarageArea']
@@ -238,7 +258,7 @@ train = fillna_and_converting_int_to_float(train)
 string_cols = cols_type(train, object)
 float_cols = cols_type(train, float)
 
-#scaler
+
 
 
 
@@ -249,38 +269,39 @@ f_data = get_dummies(train, string_cols)
 to_drop_columns = ['Id', 'SalePrice']
 X = f_data.drop(to_drop_columns, axis=1)
 y = f_data['SalePrice']
-
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
+
+#scaler
+X_train, X_test = scaler_func(X_train, X_test)
 
 outliers = LocalOutlierFactor()
 outliers = outliers.fit_predict(X)
 
-clf = IsolationForest()
-clf.fit(X_train)
-y_train_pred = clf.predict(y_train)
-print(y_train_pred)
 
-#y_pred_train = clf.predict(X_train)
-#y_pred_test = clf.predict(X_test)
+
+def LinearRegressionFunc(X_train, X_test, y_train, y_test):
+    lm = LinearRegression()
+    lm.fit(X_train, y_train)
+    y_pred_train = lm.predict(X_train)
+    y_pred_test = lm.predict(X_test)
+    print(int(score))
+
+
+
+LinearRegressionFunc(X_train, X_test, y_train, y_test)
+
 
 #xx, yy = np.meshgrid(np.linspace(-5,5,50), np.linspace(-5,5,50))
 #Z = clf.decision_function(np.c_[xx.ravel(), yy.ravel()])
 #Z = Z.reshape(xx.shape)
 
-
-
 #########Results##############
 #r_logistic_regression = logistic_reg(1,X_train, y_train))
+#parameters = {"criterion": ['entropy','gini']}
+#RandomForestClassifierFunction(X_train,X_test, y_train, y_test, parameters)
 
-
-
-#def isolation_forest_func(train, test):
-#    clf = IsolationForest()
-#    clf.fit(train)
-#    pred = clf.predict(test)
-#    return pred
-
+##########Notes#############
 
 #faire tourner un tsne
 #faire tourner un isolation forest
