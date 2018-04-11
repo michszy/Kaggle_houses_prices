@@ -106,6 +106,20 @@
 
 #fair un mask pour les 1er Flr surface + 2eme Flr Surface == GrdLivArea
 
+
+#OverallQual      0.790982
+#GrLivArea        0.708624
+#GarageCars       0.640409
+#GarageArea       0.623431
+#TotalBsmtSF      0.613581
+#1stFlrSF         0.605852
+#FullBath         0.560664
+#TotRmsAbvGrd     0.533723
+#YearBuilt        0.522897
+#YearRemodAdd     0.507101
+
+
+
 # =============================================================================
 
 import seaborn as sns
@@ -261,15 +275,14 @@ float_cols = cols_type(train, float)
 
 
 
-
 # make dummies
 f_data = get_dummies(train, string_cols)
-
+#print(len(f_data))
 
 to_drop_columns = ['Id', 'SalePrice']
 X = f_data.drop(to_drop_columns, axis=1)
 y = f_data['SalePrice']
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=(1/1460   )
 
 
 #scaler
@@ -280,28 +293,34 @@ outliers = outliers.fit_predict(X)
 
 
 
-def LinearRegressionFunc(X_train, X_test, y_train, y_test):
-    lm = LinearRegression()
-    lm.fit(X_train, y_train)
-    y_pred_train = lm.predict(X_train)
-    y_pred_test = lm.predict(X_test)
-    print(int(score))
-
-
-
-LinearRegressionFunc(X_train, X_test, y_train, y_test)
-
-
 #xx, yy = np.meshgrid(np.linspace(-5,5,50), np.linspace(-5,5,50))
 #Z = clf.decision_function(np.c_[xx.ravel(), yy.ravel()])
 #Z = Z.reshape(xx.shape)
 
 #########Results##############
-#r_logistic_regression = logistic_reg(1,X_train, y_train))
+#r_logistic_regression = logistic_reg(1,X_train, y_train)
 #parameters = {"criterion": ['entropy','gini']}
-#RandomForestClassifierFunction(X_train,X_test, y_train, y_test, parameters)
+#r = RandomForestClassifierFunction(X_train,X_test, y_train, y_test, parameters)
+#print (r)
 
+
+def user_welcome():
+    print("Wecolme new user, please enter your name")
+    name = input()
+    print ('Hello dear {}, Welcome to the kaggle house predict interface'.format(name))
+    show_menu()
+
+
+def show_menu():
+    print("What would you like to see??")
+    print('LinearRegression : 1')
+    choice = input()
+    if (choice == '1'):
+        print(logistic_reg(1,X_train, y_train))
+    else:
+        print ('Bye Bye')
 ##########Notes#############
+#user_welcome()
 
 #faire tourner un tsne
 #faire tourner un isolation forest
